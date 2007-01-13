@@ -82,38 +82,40 @@ perform XML-RPC RPCs.
 
 Arguments:
 
- C<TRANSPORT>
+=over 4
 
-  This is the XML transport object the client will use to transport
-  XML to and from the server.  The only XML transport class included
-  in the B<RPC-Xmlrpc_c> package is C<RPC::Xmlrpc_c::Curl>, which
-  transports the XML via HTTP using the popular Curl HTTP library.
-  But in theory, there can be other transport classes, and they don't
-  even have to use HTTP (But if they don't, then it's not actually
-  XML-RPC).
+=item TRANSPORT
 
-  This argument is mandatory.
+This is the XML transport object the client will use to transport
+XML to and from the server.  The only XML transport class included
+in the B<RPC-Xmlrpc_c> package is C<RPC::Xmlrpc_c::Curl>, which
+transports the XML via HTTP using the popular Curl HTTP library.
+But in theory, there can be other transport classes, and they don't
+even have to use HTTP (But if they don't, then it's not actually
+XML-RPC).
 
- C<CLIENT>
+This argument is mandatory.
 
-  This is a reference to a scalar variable that the method sets to
-  the handle of the new object.
+=item CLIENT
 
-  If you do not specify this option, you don't get a handle for the
-  object, and as no reference is created to the object, it gets destroyed
-  as soon as it is created.  This is not very useful.
-  
-  If the method fails to create the object, it sets the variable
-  arbitrarily.  See C<ERROR>.
+This is a reference to a scalar variable that the method sets to
+the handle of the new object.
 
- C<ERROR>
+If you do not specify this option, you don't get a handle for the
+object, and as no reference is created to the object, it gets destroyed
+as soon as it is created.  This is not very useful.
 
-  This is a reference to a scalar variable that the method sets to
-  a text description of why it is unable to create the object.  If
-  it I<is> able to create the object, it sets it to C<undef>.
+If the method fails to create the object, it sets the variable
+arbitrarily.  See C<ERROR>.
 
-  If you do not specify this option and creation fails, the method
-  croaks.
+=item ERROR
+
+This is a reference to a scalar variable that the method sets to
+a text description of why it is unable to create the object.  If
+it I<is> able to create the object, it sets it to C<undef>.
+
+If you do not specify this option and creation fails, the method
+croaks.
 
 =cut
 
@@ -220,88 +222,90 @@ response, then returns the result.
 
 Arguments:
 
- CARRIAGEPARM
+=over 4
 
-  This is the carriage parameter that tells the XML transport how to 
-  transport the XML for this call.  Its form and meaning depend on the
-  transport class.  You chose the transport class when you created the
-  C<RPC::Xmlrpc_c::Client> object.  See the transport documentation
-  (e.g. C<RPC::Xmlrpc_c::Client::Curl>) for an explanation of this
-  value. 
+=item CARRIAGEPARM
 
-  The most typical thing for the carriage parameter to tell is the URL
-  of the server.
+This is the carriage parameter that tells the XML transport how to 
+transport the XML for this call.  Its form and meaning depend on the
+transport class.  You chose the transport class when you created the
+C<RPC::Xmlrpc_c::Client> object.  See the transport documentation
+(e.g. C<RPC::Xmlrpc_c::Client::Curl>) for an explanation of this
+value. 
 
- METHOD
+The most typical thing for the carriage parameter to tell is the URL
+of the server.
 
-  This is the name of the XML-RPC method you are invoking.  An XML-RPC
-  server offers various methods, identified by textual names.
+=item METHOD
 
- PARAMS
+This is the name of the XML-RPC method you are invoking.  An XML-RPC
+server offers various methods, identified by textual names.
 
-  This is a reference to an array of parameters for the RPC.  An XML-RPC
-  has an arbitrary number of ordered parameters.  The meaning of the
-  parameters depends upon the XML-RPC method.
+=item PARAMS
 
-  The correspondence between each item in the array and the XML-RPC
-  value which is the parameter is that documented for
-  C<RPC::Xmlrpc_c::newSimple()>.  For example, 'hello' would signify
-  the XML-RPC string value "hello", while [1, 2, 3] would signify an
-  XML-RPC array value with 3 items, being respectively XML-RPC string
-  values '1', '2', and '3'.
+This is a reference to an array of parameters for the RPC.  An XML-RPC
+has an arbitrary number of ordered parameters.  The meaning of the
+parameters depends upon the XML-RPC method.
 
-  If you need more precise control over the XML-RPC types and values,
-  use objects of class C<XML::Xmlrpc_c::Value>.  Example:
+The correspondence between each item in the array and the XML-RPC
+value which is the parameter is that documented for
+C<RPC::Xmlrpc_c::newSimple()>.  For example, 'hello' would signify
+the XML-RPC string value "hello", while [1, 2, 3] would signify an
+XML-RPC array value with 3 items, being respectively XML-RPC string
+values '1', '2', and '3'.
 
-      PARAMS => [ XML::Xmlrpc_c::Value(5),
-                  XML::Xmlrpc_c::Value(7) ]
+If you need more precise control over the XML-RPC types and values,
+use objects of class C<XML::Xmlrpc_c::Value>.  Example:
 
-  If you do not specify C<PARAMS>, there are no XML-RPC parameters.
+    PARAMS => [ XML::Xmlrpc_c::Value(5),
+                XML::Xmlrpc_c::Value(7) ]
 
- RESULT
+If you do not specify C<PARAMS>, there are no XML-RPC parameters.
 
-  This is a reference to a scalar variable.  C<call> sets this variable
-  to the XML-RPC result of the RPC.
+=item RESULT
 
-  The value set is of a basic Perl type.  The correspondence between the
-  XML-RPC value which is the result and the value of this variable is that
-  you would get from C<RPC::Xmlrpc_c::Value::ValueSimple()>.
+This is a reference to a scalar variable.  C<call> sets this variable
+to the XML-RPC result of the RPC.
 
-  If the RPC fails or the client is unable to execute the RPC (see
-  C<ERROR>), call() croaks.
+The value set is of a basic Perl type.  The correspondence between the
+XML-RPC value which is the result and the value of this variable is that
+you would get from C<RPC::Xmlrpc_c::Value::ValueSimple()>.
 
-  If you need more precise analysis of the result, use C<RESULT_XMLRPC>
-  instead.
+If the RPC fails or the client is unable to execute the RPC (see
+C<ERROR>), call() croaks.
 
-  You can specify both C<RESULT> and C<RESULT_XMLRPC> to get the same result
-  in two forms.
+If you need more precise analysis of the result, use C<RESULT_XMLRPC>
+instead.
 
-  If you specify neither C<RESULT> nor C<RESULT_XMLRPC>, you can't know the
-  result of the RPC.
+You can specify both C<RESULT> and C<RESULT_XMLRPC> to get the same result
+in two forms.
+
+If you specify neither C<RESULT> nor C<RESULT_XMLRPC>, you can't know the
+result of the RPC.
   
- RESULT_XMLRPC
+=item RESULT_XMLRPC
 
-  This is like C<RESULT> except that C<call> sets the referenced variable to
-  a C<RPC::Xmlrpc_c::Value> object, which means you have more detail about
-  the result.
+This is like C<RESULT> except that C<call> sets the referenced variable to
+a C<RPC::Xmlrpc_c::Value> object, which means you have more detail about
+the result.
 
-  But you also need more code to use it.
+But you also need more code to use it.
 
- C<ERROR>
+tem ERROR
 
-  This is a reference to a scalar variable that the method sets to
-  a text description of why it is unable to execute the RPC or why
-  the RPC, though fully executed, failed.  (The only way to distinguish
-  the two is in the English interpretation of the text).
+This is a reference to a scalar variable that the method sets to
+a text description of why it is unable to execute the RPC or why
+the RPC, though fully executed, failed.  (The only way to distinguish
+the two is in the English interpretation of the text).
 
-  If the RPC completed with success, the method sets this variable to
-  C<undef>.
+If the RPC completed with success, the method sets this variable to
+C<undef>.
 
-  If you do not specify this option and C<call> is unable to execute
-  the RPC or the RPC fails, you can't tell.
+If you do not specify this option and C<call> is unable to execute
+the RPC or the RPC fails, you can't tell.
 
-  When C<call> sets the C<ERROR> variable to a defined value, it makes
-  the C<RESULT> and C<RESULT_XMLRPC> variables undefined.
+When C<call> sets the C<ERROR> variable to a defined value, it makes
+the C<RESULT> and C<RESULT_XMLRPC> variables undefined.
 
 =cut
 

@@ -6,14 +6,17 @@ use ExtUtils::MakeMaker;
 my ($mode) = @ARGV;
 
 my @warnings;
+my @debugOpts;
 
 if ($mode && $mode eq 'dev') {
    @warnings = qw{-Wall -Wmissing-declarations -Wundef
                   -Wimplicit -Winline
                   -Wstrict-prototypes -Wmissing-prototypes
                   -Werror};             
+   @debugOpts = qw{-g}
 } else {
   @warnings = ();
+  @debugOpts = ();
 }
 
 my $xmlrpcConfigProg = 'xmlrpc-c-config';
@@ -39,6 +42,6 @@ if ($xmlrpcVersion eq '') {
                   'LIBS'	 => $xmlrpcLibs,
                   'DEFINE'	 => '',
                   'INC'	         => $xmlrpcInc,
-                  'CCFLAGS'      => join(' ', @warnings),
+                  'CCFLAGS'      => join(' ', @warnings, @debugOpts),
                   );
 }

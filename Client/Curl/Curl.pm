@@ -41,7 +41,7 @@ require Exporter;
 require DynaLoader;
 our @ISA = qw(Exporter DynaLoader);
 our @EXPORT = qw( createObject call );
-our $VERSION = "1.01";
+our $VERSION = "1.02";
 use Carp;
 use Data::Dumper;
 
@@ -80,11 +80,19 @@ Arguments:
  C<TRANSPORTPARMS>
 
   This is a reference to a hash of named transport parameters.
-  
-  There are none defined today.  The underlying Xmlrpc-c Curl transport
-  recognizes 18 paramters, such as SSL authentication information, and
-  some day there will be C<TRANSPORTPARMS> values to control those.
-  Today, they are always the Xmlrpc-c defaults.
+
+  Example:
+
+     { network_interface  => 'eth0',
+       no_ssl_verify_peer => 1
+     }
+
+  The names (hash keys) are the names of the members of
+  C<struct xmlrpc_curl_xportparms> in Xmlrpc-c.
+
+  Any transport parameter you don't specify defaults to the Xmlrpc-c
+  default.  If you specify a key that is not a valid transport
+  parameter name, createObject() ignores it.
 
  C<ERROR>
 
@@ -107,9 +115,9 @@ sub createObject {
 
     my $transportR = {};
 
-    my %transportParms;
+    my $transportParms = $args{TRANSPORTPARMS} || {};
 
-    _transportCreate($args{TRANSPORTPARMS},
+    _transportCreate($transportParms,
                      \$transportR->{_transport},
                      \$transportR->{_transportOps},
                      \$errorRet);

@@ -1,0 +1,12 @@
+Written by Bryan Henderson, San Jose California, December 2006.
+
+07.01.13 Release 1.02
+
+         Client::Curl::createObject():  Allow caller to specify all of the
+         Curl transport parameters.
+
+         Client::Curl::createObject():  Allow missing TRANSPORT_PARMS argument.
+
+06.12.30 Release 1.01
+
+         First release.
