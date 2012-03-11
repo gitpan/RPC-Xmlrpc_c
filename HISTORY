@@ -1,5 +1,9 @@
 Written by Bryan Henderson, San Jose California, December 2006.
 
+12.03.11 Release 1.03
+
+         Add Serialize.
+
 07.01.13 Release 1.02
 
          Client::Curl::createObject():  Allow caller to specify all of the

@@ -4,6 +4,7 @@
 #include "XSUB.h"
 
 #include <xmlrpc-c/base.h>
+#include <xmlrpc-c/util.h>
 #include <xmlrpc-c/client.h>
 
 static void
@@ -49,6 +50,38 @@ returnCallData(xmlrpc_env     const env,
         SV * const result = SvRV(resultR);
     
         sv_setuv(result, (unsigned long)resultP);
+    }
+}
+
+
+
+static void
+returnCallXmlData(xmlrpc_env         const env,
+                  xmlrpc_mem_block * const xmlP,
+                  SV *               const xmlR,
+                  SV *               const errorRetR) {
+
+    if (SvROK(errorRetR)) {
+        SV * const errorRet = SvRV(errorRetR);
+
+        if (env.fault_occurred)
+            sv_setpv(errorRet, env.fault_string);
+        else
+            sv_setsv(errorRet, &PL_sv_undef);
+    }
+
+    if (!env.fault_occurred) {
+        SV * const xml = SvRV(xmlR);
+
+        xmlrpc_env env;
+
+        xmlrpc_env_init(&env);
+
+        XMLRPC_TYPED_MEM_BLOCK_APPEND(char, &env, xmlP, "\0", 1);
+
+        sv_setpv(xml, XMLRPC_TYPED_MEM_BLOCK_CONTENTS(char, xmlP));
+
+        xmlrpc_env_clean(&env);
     }
 }
 
@@ -177,4 +210,38 @@ _clientCall(_client, serverUrl, methodName, _paramArray, resultR, errorRetR)
 
         xmlrpc_env_clean(&env);
     }
+
+
+
+void
+_callXml(methodName, _paramArray, xmlR, errorRetR)
+
+    const char * methodName;
+    unsigned long _paramArray;
+    SV * xmlR;
+    SV * errorRetR;
+
+    CODE:
+    {
+        xmlrpc_value *  const paramArrayP  = (xmlrpc_value *)_paramArray;
+
+        xmlrpc_env env;
+
+        xmlrpc_mem_block output;
+
+        XMLRPC_ASSERT_ARRAY_OK(paramArrayP);
+
+        xmlrpc_env_init(&env);
+
+        XMLRPC_TYPED_MEM_BLOCK_INIT(char, &env, &output, 0);
+
+        xmlrpc_serialize_call(&env, &output, methodName, paramArrayP);
+
+        returnCallXmlData(env, &output, xmlR, errorRetR);
+
+        XMLRPC_TYPED_MEM_BLOCK_CLEAN(char, &output);  
+
+        xmlrpc_env_clean(&env);
+    }
+
 

@@ -55,6 +55,26 @@ sub testValue() {
 
 
 
+sub testCallXml() {
+    print("Testing Client::callXml\n");
+
+    my @params = (RPC::Xmlrpc_c::Value->newInt(5),
+                  RPC::Xmlrpc_c::Value->newInt(7));
+              
+    RPC::Xmlrpc_c::Client::callXml(METHOD => 'sample.add',
+                                   PARAMS => \@params,
+                                   XML    => \my $xml,
+                                   ERROR  => \my $error);
+    
+    if ($error) {
+        print STDERR ("Failed.  $error\n");
+    } else {
+        print("XML: '$xml'\n");
+    }
+}
+
+
+
 sub testClient() {
     print("Testing Client\n");
 
@@ -125,6 +145,7 @@ sub testClientSimple() {
 
 sub testTransport() {
 
+    print("Use debugger to verify transport parameters:\n");
     print("Set debugger breakpoint on " .
           "xmlrpc_curl_transport.c:getXportParms()\n");
     print("in /usr/bin/perl, pid $PID\n");
@@ -168,6 +189,8 @@ sub testTransport() {
 ###############################################################################
 
 testValue();
+
+testCallXml();
 
 testClient();
 

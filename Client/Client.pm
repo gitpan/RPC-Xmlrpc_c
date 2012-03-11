@@ -34,6 +34,14 @@ RPC::Xmlrpc_c::Client - XML-RPC For C/C++ client
                        
  print("Sum of 5 and 7 is $result->value()\n");
 
+ RPC::Xmlrpc_c::Client::callXml(METHOD => 'sample.add',
+                                PARAMS => [ $addend1, $addend2 ],
+                                XML    => \$xml,
+                                ERROR  => \$error);
+
+ print("XML for call is: $xml\n");
+
+
 =head1 DESCRIPTION
 
 This module performs XML-RPC client functions, via the executable libraries
@@ -57,9 +65,9 @@ require DynaLoader;
 our @ISA = qw(Exporter DynaLoader);
 our @EXPORT = qw( );
 our @EXPORT_OK;
-our $VERSION = "1.01";
+our $VERSION = "1.03";
 use Carp;
-use Data::Dumper;
+#use Data::Dumper;
 
 bootstrap RPC::Xmlrpc_c::Client $VERSION;
 
@@ -180,9 +188,8 @@ sub makeParamArray($$) {
 
     if (defined($params)) {
         if (ref($params) ne 'ARRAY') {
-            croak("PARAMS argument to " .
-                  "RPC::Xmlrpc_c::Client::Call() must be a reference to " .
-                  "an array.");
+            croak("PARAMS argument " .
+                  "must be a reference to an array.");
         } else {
             $$paramArrayR = RPC::Xmlrpc_c::Value->newSimple($params);
         }
@@ -365,6 +372,91 @@ sub call(%) {
 }
 
 push (@EXPORT_OK, 'call');
+
+
+
+=head2 RPC::Xmlrpc_c::Client::callXml
+
+ RPC::Xmlrpc_c::Client::callXml(METHOD => 'sample.add',
+                                PARAMS => [ $addend1, $addend2 ],
+                                XML    => \$xml,
+                                ERROR  => \$error);
+
+ print("XML for call is: $xml\n");
+
+
+This computes the XML for the described XML-RPC call.  You could send this to
+an XML-RPC server, and get back the XML-RPC response XML, to effect an XML-RPC
+RPC.
+
+
+Arguments:
+
+=over 4
+
+=item METHOD
+
+This is the name of the XML-RPC method you are invoking.
+
+It is analogous to the same-named parameter of C<RPC::Xmlrpc_c::Client::call>.
+
+=item PARAMS
+
+This is a reference to an array of parameters for the RPC.
+
+It is analogous to the same-named parameter of C<RPC::Xmlrpc_c::Client::call>.
+
+=item XML
+
+This is a reference to a scalar variable.  C<callXml> sets this variable
+to the XML for the call.
+
+=item ERROR
+
+This is a reference to a scalar variable that the method sets to a text
+description of why it is unable to generate the XML.  If it I<is> able to
+create the object, it sets it to C<undef>.
+
+If you do not specify this option and creation fails, the method croaks.
+
+=cut
+
+sub callXml(%) {
+
+    my (%args) = @_;
+
+    my $errorRet;
+        # Description of why we can't generate the XML.  Undefined if
+        # we haven't given up yet.
+
+    if (!defined($args{METHOD})) {
+        $errorRet = "You must specify a METHOD argument";
+    } else {
+        makeParamArray(\%args, \my $paramArray);
+
+        _callXml($args{METHOD},
+                 $paramArray->{_value},
+                 \my $xml, \my $error);
+
+        if ($error) {
+            $errorRet = $error;
+        } else {
+            if ($args{XML}) {
+                $ {$args{XML}} = $xml;
+            }
+        }
+
+    }
+    if ($args{ERROR}) {
+        $ {$args{ERROR}} = $errorRet;
+    } else {
+        if ($errorRet) {
+            croak("Failed to generate XML-RPC call XML.  $errorRet");
+        }
+    }
+}
+
+push (@EXPORT_OK, 'callXml');
 
 
 
