@@ -110,7 +110,7 @@ use warnings;
 require Exporter;
 require DynaLoader;
 our @ISA = qw(Exporter DynaLoader);
-our $VERSION = '1.04';
+our $VERSION = '1.01';
 our @EXPORT;
 our @EXPORT_OK;
 use Carp;
