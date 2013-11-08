@@ -15,7 +15,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-//#include <string.h>
+#include <string.h>
 
 #include <xmlrpc-c/base.h>
 #include <xmlrpc-c/client.h>
@@ -28,6 +28,7 @@ strfree(const char * const string) {
 
     free((void*)string);
 }
+
 
 
 static bool
@@ -61,6 +62,48 @@ returnData(const char *                     const error,
     
         sv_setuv(execObj, (unsigned long)transportP);
         sv_setuv(transportOps, (unsigned long)&xmlrpc_curl_transport_ops);
+    }
+}
+
+
+
+static void
+fetchHvUint(HV *                     const hashP,
+            const char *             const key,
+            unsigned int *           const valueP) {
+/*----------------------------------------------------------------------------
+   Get the value of the hash member with key 'key' in the hash
+   *hashP as an unsigned integer value.
+
+   Return it as *valueP; return *valueP == 0 if there is no such
+   member or its value is Perl "undefined."
+-----------------------------------------------------------------------------*/
+    SV ** const valueSvPP = hv_fetch(hashP, key, strlen(key), 0);
+    
+    if (valueSvPP == NULL)
+        *valueP = 0;
+    else{
+        SV * const valueSvP = *valueSvPP;
+
+        assert(valueSvP);
+
+        if (SvOK(valueSvP)) {
+            if (!looks_like_number(valueSvP))
+                croak("Value of hash member '%s' is not a number", key);
+            else {
+                double const valueNum = SvNV(valueSvP);
+
+                if (valueNum < 0)
+                    croak("Value of hash member '%s' is negative", key);
+
+                if ((unsigned int)valueNum != valueNum)
+                    croak("Value of hash member '%s' is fractional", key);
+
+                *valueP = (unsigned int)valueNum;
+            }
+
+        } else
+            *valueP = 0;
     }
 }
 
@@ -231,8 +274,10 @@ makeXportParms(SV *                            const xportParmsR,
                   &xportParmsP->egdsocket);
     fetchHvString(inHashP, "ssl_cipher_list",
                   &xportParmsP->ssl_cipher_list);
+    fetchHvUint(inHashP, "timeout", 
+                &xportParmsP->timeout);
 
-    *parmSizeP = XMLRPC_CXPSIZE(ssl_cipher_list);
+    *parmSizeP = XMLRPC_CXPSIZE(timeout);
     *errorP = NULL;
 }
 
